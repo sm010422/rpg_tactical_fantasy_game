@@ -118,15 +118,15 @@ class StartScene(Scene):
     @staticmethod
     def generate_level_window() -> pygame.Surface:
         """
-        Handle the generation of the screen dedicated to the ongoing level according to set parameters
+        Handle the generation of the screen dedicated to the ongoing level according to set parameters.
         """
-        # Modify screen
         flags: int = 0
         size: tuple[int, int] = (WIN_WIDTH, WIN_HEIGHT)
-        if StartScene.screen_size == 2:
+        if StartScene.screen_size == 2:  # Fullscreen mode
             flags = pygame.FULLSCREEN
-            size = (0, 0)
+            size = pygame.display.get_desktop_sizes()[0]  # Automatically fetch full desktop size
         return pygame.display.set_mode(size, flags)
+
 
     def update_state(self) -> bool:
         """
@@ -270,22 +270,24 @@ class StartScene(Scene):
 
     def modify_option_value(self, option_name: str, option_value: int = 0) -> None:
         """
-
-        Keyword arguments:
-        option_name --
-        option_value --
+        Modify game options dynamically and save changes.
         """
-        if option_name == "language":
-            self.choose_language_menu()
-            return
-        elif option_name == "move_speed":
-            Movable.move_speed = option_value
-        elif option_name == "screen_size":
+        if option_name == "screen_size":
             StartScene.screen_size = option_value
-        else:
-            print(f"Unrecognized option name : {option_name} with value {option_value}")
-            return
-        self.modify_options_file(option_name, str(option_value))
+            self.modify_options_file(option_name, str(option_value))
+        
+            # Reinitialize the screen for new size
+            screen = StartScene.generate_level_window()
+            self.screen = screen  # Update screen in StartScene
+            self.menu_screen = self.screen.copy()
+        
+            # Update background and other scaled elements
+            self.background = pygame.transform.scale(
+                pygame.image.load("imgs/interface/main_menu_background.jpg").convert_alpha(),
+                screen.get_size()
+            )
+
+
 
     @staticmethod
     def execute_action(action: Callable) -> None:
