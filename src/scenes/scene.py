@@ -91,3 +91,10 @@ class Scene:
         (27 for Escape key)
         """
         pass
+
+    def scale_surface_to_screen(surface: pygame.Surface, screen: pygame.Surface) -> pygame.Surface:
+        """
+        Scale a given surface to fit the current screen size.
+        """
+        screen_width, screen_height = screen.get_size()
+        return pygame.transform.scale(surface, (screen_width, screen_height))

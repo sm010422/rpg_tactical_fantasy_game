@@ -600,46 +600,31 @@ class LevelScene(Scene):
     def display(self) -> None:
         """
         Display all the elements of the level.
-        Display the ongoing animation if there is any.
-        Display also all the menus in the background (that should be visible)
-        and lastly the active menu.
+        Adjust elements for fullscreen if necessary.
         """
-        self.active_screen_part.blit(self.map["img"], (self.map["x"], self.map["y"]))
+        # Get the current screen size
+        screen_width, screen_height = self.screen.get_size()
+    
+        # Scale background and map content if the screen is resized
+        scaled_map = pygame.transform.scale(
+            self.map["img"], (screen_width, screen_height)
+        )
+    
+        self.active_screen_part.blit(scaled_map, (0, 0))  # Scale map to fit the screen
         self.sidebar.display(self.active_screen_part, self.turn, self.hovered_entity)
 
-        for mission in self.missions:
-            mission.display(self.active_screen_part)
-
+        # Display all entities
         for collection in self.entities.values():
             for entity in collection:
                 entity.display(self.active_screen_part)
                 if isinstance(entity, Destroyable):
                     entity.display_hit_points(self.active_screen_part)
 
-        if self.watched_entity:
-            self.show_possible_actions(self.watched_entity, self.active_screen_part)
-
-        # If the game hasn't yet started
-        if self.game_phase is LevelStatus.INITIALIZATION:
-            self.show_possible_placements(self.active_screen_part)
-        else:
-            if self.selected_player:
-                # If player is waiting to move
-                if self.possible_moves:
-                    self.show_possible_actions(
-                        self.selected_player, self.active_screen_part
-                    )
-                elif self.possible_attacks:
-                    self.show_possible_attacks(
-                        self.selected_player, self.active_screen_part
-                    )
-                elif self.possible_interactions:
-                    self.show_possible_interactions(self.active_screen_part)
-
         if self.animation:
             self.animation.display(self.active_screen_part)
         else:
             self.menu_manager.display()
+
 
     def show_possible_actions(self, movable: Movable, screen: pygame.Surface) -> None:
         """
