@@ -364,7 +364,10 @@ class StartScene(Scene):
 
 
     def modify_option_value(self, option_name: str, option_value: int = 0) -> None:
-        if option_name == "screen_size":
+        if option_name == "language":
+            self.choose_language_menu()
+            return
+        elif option_name == "screen_size":
             StartScene.screen_size = option_value
             self.screen = self.generate_level_window()
             self.background = pygame.transform.scale(
