@@ -604,24 +604,26 @@ class LevelScene(Scene):
         """
         # Get the current screen size
         screen_width, screen_height = self.screen.get_size()
-    
-        # Scale background and map content if the screen is resized
-        scaled_map = pygame.transform.scale(
-            self.map["img"], (screen_width, screen_height)
-        )
-    
-        self.active_screen_part.blit(scaled_map, (0, 0))  # Scale map to fit the screen
-        self.sidebar.display(self.active_screen_part, self.turn, self.hovered_entity)
+
+        # Scale map and adjust positions for fullscreen mode
+        scaled_map = pygame.transform.scale(self.map["img"], (screen_width, screen_height))
+        self.screen.blit(scaled_map, (0, 0))  # Fill the screen with the scaled map
+
+        # Center map content
+        self.map["x"] = (screen_width - self.map["width"]) // 2
+        self.map["y"] = (screen_height - self.map["height"]) // 2
+        self.screen.blit(self.map["img"], (self.map["x"], self.map["y"]))
 
         # Display all entities
         for collection in self.entities.values():
             for entity in collection:
-                entity.display(self.active_screen_part)
+                entity.display(self.screen)
                 if isinstance(entity, Destroyable):
-                    entity.display_hit_points(self.active_screen_part)
+                    entity.display_hit_points(self.screen)
 
+        # Display animations
         if self.animation:
-            self.animation.display(self.active_screen_part)
+            self.animation.display(self.screen)
         else:
             self.menu_manager.display()
 

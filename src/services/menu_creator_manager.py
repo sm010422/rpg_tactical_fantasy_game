@@ -1254,28 +1254,55 @@ def create_reward_menu(mission: Mission) -> InfoBox:
     )
 
 
-def create_start_menu(buttons_callback: dict[str, Callable]) -> InfoBox:
+def create_start_menu(actions: dict[str, Callable]) -> InfoBox:
     """
-    Return the interface of the main menu of the game (in the start screen).
+    Create the start menu with buttons for New Game, Load Game, Options, and Exit Game.
+    Dynamically adjusts the size and position based on the screen size.
     """
+    screen_size = pygame.display.get_surface().get_size()
+    menu_width = screen_size[0] // 2
+    button_width = menu_width // 2
+    button_height = 50  # Fixed height for buttons
+
+    # Calculate dynamic positions for buttons
+    buttons = [
+        Button(
+            title="New game",
+            callback=actions["new_game"],
+            size=(button_width, button_height),
+        ),
+        Button(
+            title="Load game",
+            callback=actions["load_menu"],
+            size=(button_width, button_height),
+        ),
+        Button(
+            title="Options",
+            callback=actions["options_menu"],
+            size=(button_width, button_height),
+        ),
+        Button(
+            title="Exit game",
+            callback=actions["exit_game"],
+            size=(button_width, button_height),
+        ),
+    ]
+
+    # Adjust button positions dynamically to center them on the screen
+    total_button_height = len(buttons) * (button_height + 10)  # 10 is the spacing
+    start_y = (screen_size[1] - total_button_height) // 2
+
+    for i, button in enumerate(buttons):
+        button.position = pygame.Vector2(
+            (screen_size[0] - button_width) // 2,
+            start_y + i * (button_height + 10),
+        )
+
+    # Create the menu
     return InfoBox(
-        STR_GAME_TITLE,
-        [
-            [
-                Button(title=STR_NEW_GAME, callback=buttons_callback["new_game"]),
-            ],
-            [
-                Button(title=STR_LOAD_GAME, callback=buttons_callback["load_menu"]),
-            ],
-            [
-                Button(title=STR_OPTIONS, callback=buttons_callback["options_menu"]),
-            ],
-            [
-                Button(title=STR_EXIT_GAME, callback=buttons_callback["exit_game"]),
-            ],
-        ],
-        width=START_MENU_WIDTH,
-        has_close_button=False,
+        title="In the name of the Five Cats",
+        element_grid=[[button] for button in buttons],
+        width=menu_width,
     )
 
 

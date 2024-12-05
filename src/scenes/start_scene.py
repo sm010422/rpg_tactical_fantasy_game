@@ -48,14 +48,15 @@ class StartScene(Scene):
 
         self.menu_screen: pygame.Surface = self.screen.copy()
 
-        # Start screen loop
+        # Start screen background
         background_image: pygame.Surface = pygame.image.load(
             "imgs/interface/main_menu_background.jpg"
         ).convert_alpha()
         self.background: pygame.Surface = pygame.transform.scale(
-            background_image, screen.get_size()
+            background_image, screen.get_size()  # Scale to the current screen size
         )
 
+        # Initialize the menu manager with fullscreen compatibility
         self.menu_manager = MenuManager(screen)
         self.menu_manager.open_menu(
             menu_creator_manager.create_start_menu(
@@ -112,8 +113,12 @@ class StartScene(Scene):
         """
         Display the background of the start screen, and all the menus.
         """
-        self.screen.blit(self.background, (0, 0))
-        self.menu_manager.display()
+        # Scale the background to fit the current screen size
+        self.background = pygame.transform.scale(
+            self.background, self.screen.get_size()
+        )
+        self.screen.blit(self.background, (0, 0))  # Display the scaled background
+        self.menu_manager.display()  # Display the menu
 
     @staticmethod
     def generate_level_window() -> pygame.Surface:
@@ -270,22 +275,39 @@ class StartScene(Scene):
 
     def modify_option_value(self, option_name: str, option_value: int = 0) -> None:
         """
-        Modify game options dynamically and save changes.
+        Modify game options based on user selection.
         """
         if option_name == "screen_size":
             StartScene.screen_size = option_value
-            self.modify_options_file(option_name, str(option_value))
-        
-            # Reinitialize the screen for new size
-            screen = StartScene.generate_level_window()
-            self.screen = screen  # Update screen in StartScene
-            self.menu_screen = self.screen.copy()
-        
-            # Update background and other scaled elements
+
+            # Update the display to fullscreen or windowed mode
+            if option_value == 2:  # Fullscreen mode
+                pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+            else:  # Windowed mode
+                pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+
+            # Update the background for the new screen size
             self.background = pygame.transform.scale(
                 pygame.image.load("imgs/interface/main_menu_background.jpg").convert_alpha(),
-                screen.get_size()
+                pygame.display.get_surface().get_size(),
             )
+
+            # Reinitialize the menu manager for the new screen size
+            self.menu_manager = MenuManager(pygame.display.get_surface())
+
+            # Rebuild the menus with adjusted button positions
+            self.menu_manager.open_menu(
+                menu_creator_manager.create_start_menu(
+                    {
+                        "new_game": self.new_game,
+                        "load_menu": self.load_menu,
+                        "options_menu": self.options_menu,
+                        "exit_game": self.exit_game,
+                    }
+                )
+            )
+        self.modify_options_file(option_name, str(option_value))
+
 
 
 
